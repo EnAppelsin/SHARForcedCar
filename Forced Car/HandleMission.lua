@@ -2,57 +2,30 @@
 local Path = "/GameData/" .. GetPath();
 local File = ReadFile(Path);
 
--- Determine if the file is for a mission (bonus, main or races)
-local Midx = string.match(Path, "b?m%di.mfk") or string.match(Path, "[gs]r%di.mfk")
-local Lidx = string.match(Path, "b?m%dl.mfk") or string.match(Path, "[gs]r%dl.mfk")
--- Determine if the file is for a level
-local LevelLoad = string.match(Path, "level.mfk")
-local LevelInit = string.match(Path, "leveli.mfk")
--- Determine if the file is for "sunday drive" (pre-mission)
-local SDLoad = string.match(Path, "m%dsdl.mfk")
-local SDInit = string.match(Path, "m%dsdi.mfk")
-
 -- Remove comments because there's A LOT of commented out stuff that can confuse the simple regexes below
-local NewFile = string.gsub(File, "//.-\n", "")	
+local NewFile = File:gsub("//.-\r\n", "\r\n")
 
-if Midx ~= nil then
-	-- Try to find a forced vehicle spawn
-	local Match = string.match(NewFile, "InitLevelPlayerVehicle%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"OTHER\"%s*%)")
-	if Match ~= nil then
-		-- Replace it with the random vehicle
-		NewFile = string.gsub(NewFile, "InitLevelPlayerVehicle%(%s*\".-\"%s*,%s*\"(.-)\"%s*,%s*\"OTHER\"%s*%)", "InitLevelPlayerVehicle(\"" .. CarName .. "\",\"%1\",\"OTHER\")", 1)
+if Path:match("b?m%di.mfk") or Path:match("[gs]r%di.mfk") then
+	NewFile = NewFile:gsub("InitLevelPlayerVehicle%s*%(%s*\".-\"%s*,%s*\"(.-)\"%s*,%s*\"OTHER\"%s*%)", "InitLevelPlayerVehicle(\"" .. CarName .. "\",\"%1\",\"OTHER\")", 1)
+	if GetSetting("SkipFMVs") then
+		NewFile = NewFile:gsub("AddObjective%s*%(%s*\"fmv\"%s*%);.-CloseObjective%s*%(%s*%);", "AddObjective(\"timer\");\nSetDurationTime(1);\nCloseObjective();", 1)
+	end
+	Output(NewFile)
+elseif Path:match("b?m%dl.mfk") or Path:match("[gs]r%dl.mfk") then
+	NewFile = NewFile:gsub("LoadDisposableCar%s*%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"OTHER\"%s*%);", "LoadDisposableCar(\"art\\cars\\" .. CarName .. ".p3d\",\"" .. CarName .. "\",\"OTHER\");", 1)
+	Output(NewFile)
+elseif Path:match("level.mfk") then
+	NewFile = NewFile:gsub("LoadDisposableCar%s*%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"DEFAULT\"%s*%);", "LoadDisposableCar(\"art\\cars\\" .. CarName .. ".p3d\",\"" .. CarName .. "\",\"DEFAULT\");", 1)
+	Output(NewFile)
+elseif Path:match("leveli.mfk") then
+	NewFile = NewFile:gsub("InitLevelPlayerVehicle%s*%(%s*\".-\"%s*,%s*\"(.-)\"%s*,%s*\"DEFAULT\"%s*%)", "InitLevelPlayerVehicle(\"" .. CarName .. "\",\"%1\",\"DEFAULT\")", 1)
+	Output(NewFile)
+elseif Path:match("m%dsdi.mfk") then
+	if GetSetting("SkipLocks") and NewFile:match("locked") then
+		NewFile = NewFile:gsub("AddStage%s*%(%s*\"locked\".-%);(.-)CloseStage%s*%(%s*%);%s*AddStage%s*%(%s*.-%s*%);.-CloseStage%s*%(%s*%);", "AddStage();%1CloseStage();", 1);
 	end
 	if GetSetting("SkipFMVs") then
-		NewFile = string.gsub(NewFile, "AddObjective%(\"fmv\"%);.-CloseObjective%(%);", "AddObjective(\"timer\");\nSetDurationTime(1);\nCloseObjective();", 1)
+		NewFile = NewFile:gsub("AddObjective%s*%(%s*\"fmv\"%s*%);.-CloseObjective%s*%(%s*%);", "AddObjective(\"timer\");\nSetDurationTime(1);\nCloseObjective();", 1)
 	end
 	Output(NewFile)
-elseif Lidx ~= nil then
-	-- Try to find a forced vehicle spawn
-	local Match = string.match(NewFile, "LoadDisposableCar%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"OTHER\"%s*%)")
-	if Match ~= nil then
-		ForcedMission = true
-		NewFile = string.gsub(NewFile, "(.*)LoadDisposableCar%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"OTHER\"%s*%);", "%1LoadDisposableCar(\"art\\cars\\" .. CarName .. ".p3d\",\"" .. CarName .. "\",\"OTHER\");", 1)
-	end
-	Output(NewFile)
-elseif LevelLoad ~= nil then
-	NewFile = string.gsub(NewFile, "(.*)LoadDisposableCar%(%s*\".-\"%s*,%s*\".-\"%s*,%s*\"DEFAULT\"%s*%);", "%1LoadDisposableCar(\"art\\cars\\" .. CarName .. ".p3d\",\"" .. CarName .. "\",\"DEFAULT\");", 1)
-	Output(NewFile)
-elseif LevelInit ~= nil then
-	NewFile = string.gsub(NewFile, "InitLevelPlayerVehicle%(%s*\".-\"%s*,%s*\"(.-)\"%s*,%s*\"DEFAULT\"%s*%)", "InitLevelPlayerVehicle(\"" .. CarName .. "\",\"%1\",\"DEFAULT\")", 1)
-	Output(NewFile)
-elseif SDInit ~= nil then
-	if GetSetting("SkipLocks") then
-		if string.match(NewFile, "locked") then
-			NewFile = string.gsub(NewFile, "AddStage%(\"locked\".-%);(.-)CloseStage%(%);%s*AddStage%(.-%);.-CloseStage%(%);", "AddStage();%1CloseStage();", 1);
-		end
-	end
-	if GetSetting("SkipFMVs") then
-		NewFile = string.gsub(NewFile, "AddObjective%(\"fmv\"%);.-CloseObjective%(%);", "AddObjective(\"timer\");\nSetDurationTime(1);\nCloseObjective();", 1)
-	end
-	Output(NewFile)
-else
-	LastLevel = nil
-	-- Don't modify other scripts
-	--print("Script " .. Path)
-	Output(NewFile);
 end
