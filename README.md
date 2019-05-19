@@ -1,6 +1,9 @@
-# SHARForcedCar
+# SHAR Forced Car
+
 Like the randomiser, with none of the random!
 Based on my randomiser mod, this lets you easily play single car challenge runs.
+
+Download the file from [the releases page](https://github.com/EnAppelsin/SHARForcedCar/releases)
 
 Install into your Hit & Run mod launcher Mod folder `Documents\My Games\Lucas' Simpsons Hit & Run Mod Launcher\Mods` and open mod settings and pick your car. It'll spawn as the default level car and as every forced car.
 
