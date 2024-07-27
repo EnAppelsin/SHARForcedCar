@@ -96,8 +96,9 @@ else
 	end
 	
 	local Function, Index = MissionInit:GetFunction("CloseStage", true)
-	MissionInit:InsertFunction(Index, "SetFadeOut", 0.1)
+	MissionInit:InsertFunction(Index, "SetSwapForcedCarLocator", CarLocator)
 	MissionInit:InsertFunction(Index, "SwapInDefaultCar")
+	MissionInit:InsertFunction(Index, "SetFadeOut", 0.1)
 	
 	if Settings.RemoveOutOfVehicle then
 		local toRemove = {}
