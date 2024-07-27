@@ -1,10 +1,47 @@
-dofile(GetModPath() .. "/Resources/lib/MFKLexer.lua")
+local LibDir = GetModPath() .. "/Resources/lib/"
+dofile(LibDir .. "MFKLexer.lua")
+dofile(LibDir .. "SPTParser.lua")
+dofile(LibDir .. "P3D2.lua")
+P3D.LoadChunks(LibDir .. "P3DChunks")
 function GetGamePath(Path)
 	Path = FixSlashes(Path,false,true)
 	if Path:sub(1,1) ~= "/" then
 		return "/GameData/" .. Path
 	end
 	return Path
+end
+
+if not IsHackLoaded("FileSystemRCFs") then
+	print("Adding RCF support to ReadFile...")
+	dofile(LibDir .. "RCF.lua")
+	local RCFFiles = {}
+	DirectoryGetEntries("/GameData/", function(Path, IsDir)
+		if IsDir then
+			return true
+		end
+		
+		if GetFileExtension(Path):lower() ~= ".rcf" then
+			return true
+		end
+		
+		local GamePath = GetGamePath(Path)
+		local RCFFile = RCF.RCFFile(GamePath)
+		for i=1,#RCFFile.Files do
+			local file = RCFFile.Files[i]
+			
+			RCFFiles[GetGamePath(file.Name)] = {GamePath, file.Position, file.Size}
+		end
+		
+		return true
+	end)
+	local _ReadFile = ReadFile
+	function ReadFile(Path)
+		local RCFFile = RCFFiles[Path]
+		if not Exists(Path, true, false) and RCFFile then
+			return ReadFileOffset(RCFFile[1], RCFFile[2], RCFFile[3])
+		end
+		return _ReadFile(Path)
+	end
 end
 
 -- CAR LIST
