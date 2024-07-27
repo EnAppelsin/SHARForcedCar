@@ -35,6 +35,10 @@ if not IsHackLoaded("FileSystemRCFs") then
 		return true
 	end)
 	local _ReadFile = ReadFile
+	ReadFileOffset = ReadFileOffset or function(Path, Position, Size)
+		local Data = _ReadFile(Path)
+		return string.sub(Data, Position + 1, Position + Size)
+	end
 	function ReadFile(Path)
 		local RCFFile = RCFFiles[Path]
 		if not Exists(Path, true, false) and RCFFile then
