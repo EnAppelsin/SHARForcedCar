@@ -96,7 +96,7 @@ else
 	end
 	
 	local Function, Index = MissionInit:GetFunction("CloseStage", true)
-	MissionInit:InsertFunction(Index, "SetSwapForcedCarLocator", CarLocator)
+	MissionInit:InsertFunction(Index, "SetSwapDefaultCarLocator", CarLocator)
 	MissionInit:InsertFunction(Index, "SwapInDefaultCar")
 	MissionInit:InsertFunction(Index, "SetFadeOut", 0.1)
 	
