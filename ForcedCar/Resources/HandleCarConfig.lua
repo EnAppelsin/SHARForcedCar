@@ -1,7 +1,4 @@
 local Path = GetPath()
-if not WildcardMatch(Path, "scripts/cars/tt.con", true, true) then
-	return
-end
 local GamePath = GetGamePath(Path)
 local CON = MFKLexer.Lexer:Parse(ReadFile(GamePath))
 
