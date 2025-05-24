@@ -140,7 +140,16 @@ local CarPool = {
 }
 
 Settings = GetSettings()
-CarName = CarPool[Settings.Vehicle]
+if Settings.UseCustomVehicle then
+	if #Settings.CustomVehicle == 0 then
+		Alert("You must specify a vehicle name when using a custom vehicle.")
+		os.exit()
+		return
+	end
+	CarName = Settings.CustomVehicle
+else
+	CarName = CarPool[Settings.Vehicle]
+end
 CarPath = "art\\cars\\" .. CarName .. ".p3d"
 ConPath = "scripts\\cars\\" .. CarName .. ".con"
 
