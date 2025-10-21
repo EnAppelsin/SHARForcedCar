@@ -283,7 +283,7 @@ end
 
 function ReadFile(path)
 	print("Simulating \"" .. path .. "\" in \"" .. MainMod .. "\".")
-	CurrentPath = path:sub(1, 10) == "/GameData/" and path:sub(11) or path
+	CurrentPath = FixSlashes(path:sub(1, 10) == "/GameData/" and path:sub(11) or path, true, false)
 	OutputTbl = {}
 	RedirectPath = nil
 	NilRedirect = false
