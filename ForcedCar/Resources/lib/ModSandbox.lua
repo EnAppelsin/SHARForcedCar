@@ -314,7 +314,11 @@ function ReadFile(path)
 		path = pathRedirect
 	end
 	
-	return _ReadFile(path)
+	if Exists(path, true, false) then
+		return _ReadFile(path)
+	else
+		return nil
+	end
 end
 
 ModSandbox = {}

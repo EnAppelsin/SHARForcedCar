@@ -43,9 +43,10 @@ end
 
 if ModSandbox then
 	local GamePath = GetGamePath(Path)
-	if not Exists(GamePath, true, false) then
-		return
+	
+	local Contents = ReadFile(GamePath)
+	
+	if Contents then
+		Output(Contents)
 	end
-
-	Output(ReadFile(GamePath))
 end
