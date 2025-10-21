@@ -1,4 +1,5 @@
 local LibDir = GetModPath() .. "/Resources/lib/"
+dofile(LibDir .. "ModSandbox.lua")
 dofile(LibDir .. "MFKLexer.lua")
 dofile(LibDir .. "SPTParser.lua")
 dofile(LibDir .. "P3D2.lua")
