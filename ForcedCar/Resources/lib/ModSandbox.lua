@@ -42,9 +42,9 @@ end
 env.print = function(...)
 	_print(...)
 end
-env.Alert = function()
+--[[env.Alert = function()
 	return -- Prevent dupe alerts.
-end
+end]]
 
 env.GetModName = function()
 	return MainMod
