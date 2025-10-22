@@ -199,6 +199,10 @@ if Exists(MainModPath .. "/CustomFiles.ini", true, false) then
 					out[outN] = utf8_char(table_unpack(chunk))
 				end
 				
+				if outN == 1 then
+					return out[1]
+				end
+				
 				return table_concat(out)
 			end
 		end
