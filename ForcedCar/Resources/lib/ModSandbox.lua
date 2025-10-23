@@ -85,27 +85,19 @@ env.loadfile = function(path)
 	return load(env.ReadFile(path), path, "t", env)
 end
 
-local CurrentPath
+local CurrentPath = nil
 env.GetPath = function()
 	return CurrentPath
 end
 
---[[env.ReadFile = function(path)
-	if path ~= nil then
-		local savedGame = path:match("^/UserData/SavedGames/Save(%d)$")
-		if savedGame then
-			return _ReadFile("/UserData/Debug/Saved Games/" .. MainMod .. "/Save" .. savedGame)
-		end
-	end
-	return _ReadFile(path)
-end]]
-
 local OutputTbl = {}
+local OutputN = 0
 env.Output = function(str)
-	OutputTbl[#OutputTbl + 1] = str
+	OutputN = OutputN + 1
+	OutputTbl[OutputN] = tostring(str)
 end
 
-local RedirectPath
+local RedirectPath = nil
 local NilRedirect = false
 env.Redirect = function(str)
 	if str == nil then
@@ -307,10 +299,49 @@ local function FindWildcardInTable(haystack, needle)
 	end
 end
 
+ModSandbox = {}
+ModSandbox.MainMod = MainMod
+
+ModSandbox.SimulatePathHandler = function()
+	CurrentPath = GetPath()
+	OutputTbl = {}
+	OutputN = 0
+	RedirectPath = nil
+	NilRedirect = false
+	
+	print("Simulating \"" .. CurrentPath .. "\" in \"" .. MainMod .. "\".")
+	
+	local pathHandler = FindWildcardInTable(PathHandlers, "/GameData/" .. CurrentPath)
+	if pathHandler then
+		print("Running: " .. pathHandler)
+		env.dofile(pathHandler)
+	
+		if OutputN > 0 then
+			for i=1,OutputN do
+				Output(OutputTbl[i])
+			end
+		elseif NilRedirect then
+			Redirect(nil)
+		elseif RedirectPath ~= nil then
+			Redirect(RedirectPath)
+		end
+		
+		return
+	end
+	
+	local pathRedirect = FindWildcardInTable(PathRedirections, "/GameData/" .. CurrentPath)
+	if pathRedirect and GetFileExtension(pathRedirect):lower() ~= ".lua" then
+		print("Redirecting: " .. pathRedirect)
+		Redirect(pathRedirect)
+	end
+end
+
 function ReadFile(path)
-	print("Simulating \"" .. path .. "\" in \"" .. MainMod .. "\".")
+	print("Reading \"" .. path .. "\" from \"" .. MainMod .. "\".")
+	
 	CurrentPath = FixSlashes(path:sub(1, 10) == "/GameData/" and path:sub(11) or path, true, false)
 	OutputTbl = {}
+	OutputN = 0
 	RedirectPath = nil
 	NilRedirect = false
 	
@@ -320,7 +351,7 @@ function ReadFile(path)
 	if pathHandler then
 		print("Running: " .. pathHandler)
 		env.dofile(pathHandler)
-		if #OutputTbl == 0 then
+		if OutputN == 0 then
 			if NilRedirect then
 				return nil
 			end
@@ -347,6 +378,3 @@ function ReadFile(path)
 		return nil
 	end
 end
-
-ModSandbox = {}
-ModSandbox.MainMod = MainMod

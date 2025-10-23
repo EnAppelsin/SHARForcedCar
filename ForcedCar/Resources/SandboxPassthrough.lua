@@ -1,7 +1,3 @@
-if IsWriting() then
-	return
-end
-
 local Path = GetPath()
 
 --[[local SavedGame = Path:match("^Save(%d)$")
@@ -42,11 +38,5 @@ for k,v in pairs(Handlers) do
 end
 
 if ModSandbox then
-	local GamePath = GetGamePath(Path)
-	
-	local Contents = ReadFile(GamePath)
-	
-	if Contents then
-		Output(Contents)
-	end
+	ModSandbox.SimulatePathHandler()
 end
