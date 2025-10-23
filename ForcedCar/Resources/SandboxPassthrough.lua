@@ -1,16 +1,5 @@
 local Path = GetPath()
 
---[[local SavedGame = Path:match("^Save(%d)$")
-if ModSandbox and SavedGame then
-	local ModSavePath = "/UserData/Debug/Saved Games/" .. ModSandbox.MainMod .. "/Save" .. SavedGame
-	if not Exists(ModSavePath, true, false) then
-		Redirect(nil)
-		return
-	end
-
-	Output(ReadFile("/UserData/Debug/Saved Games/" .. ModSandbox.MainMod .. "/Save" .. SavedGame))
-end]]
-
 local Handlers = {
 	["scripts\\missions\\level0?\\level.mfk"] = "Resources/HandleLevelLoad.lua",
 	["scripts\\missions\\level0?\\leveli.mfk"] = "Resources/HandleLevelInit.lua",
