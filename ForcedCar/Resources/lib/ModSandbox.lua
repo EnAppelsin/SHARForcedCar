@@ -1,6 +1,9 @@
 local _print = print
+local isTesting = IsTesting()
 local function print(...)
-	--_print("Mod Sandbox", ...)
+	if isTesting then
+		_print("Mod Sandbox", ...)
+	end
 end
 local _ReadFile = ReadFile
 
@@ -323,6 +326,7 @@ function ReadFile(path)
 			end
 			
 			if RedirectPath ~= nil then
+				print("Redirecting: " .. RedirectPath)
 				return _ReadFile(RedirectPath)
 			end
 			
