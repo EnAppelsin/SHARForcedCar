@@ -140,4 +140,34 @@ else
 	end
 end
 
+if Settings.AddBustedCondition or Settings.AddDamageCondition then
+	local inStage = false
+	local hasBusted = false
+	local hasDamage = false
+	for Function, Index in MissionInit:GetFunctions(nil, true) do
+		if Function.Name:lower() == "closestage" then
+			inStage = true
+			hasBusted = false
+		elseif Function.Name:lower() == "addstage" then
+			inStage = false
+			if not hasBusted and Settings.AddBustedCondition then
+				MissionInit:InsertFunction(Index + 1, "CloseCondition")
+				MissionInit:InsertFunction(Index + 1, "AddCondition", "hitandruncaught")
+			end
+			if not hasDamage and Settings.AddDamageCondition then
+				MissionInit:InsertFunction(Index + 1, "CloseCondition")
+				MissionInit:InsertFunction(Index + 1, "SetCondTargetVehicle", "current")
+				MissionInit:InsertFunction(Index + 1, "SetCondMinHealth", 0.0)
+				MissionInit:InsertFunction(Index + 1, "AddCondition", "damage")
+			end
+		elseif inStage and Function.Name:lower() == "addcondition" then
+			if Function.Arguments[1] == "hitandruncaught" then
+				hasBusted = true
+			elseif Function.Arguments[1] == "damage" then
+				hasDamage = true
+			end
+		end
+	end
+end
+
 MissionLoad:Output(true)
