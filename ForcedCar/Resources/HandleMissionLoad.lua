@@ -5,8 +5,10 @@ local MissionLoad = MFKLexer.Lexer:Parse(ReadFile(GamePath))
 MissionInit = MFKLexer.Lexer:Parse(ReadFile(GamePath:sub(1, -6) .. "i.mfk"))
 
 local isForced = false
+local oldForcedCar = nil
 for Function in MissionLoad:GetFunctions("LoadDisposableCar", true) do
 	if Function.Arguments[3] == "OTHER" then
+		oldForcedCar = Function.Arguments[2]
 		Function.Arguments[1] = CarPath
 		Function.Arguments[2] = CarName
 		isForced = true
@@ -19,6 +21,7 @@ end
 
 if isForced then
 	MissionInit:SetAll("InitLevelPlayerVehicle", 1, CarName)
+	MissionInit:SetAll("SetCondTargetVehicle", 1, CarName, oldForcedCar)
 else
 	local CarLocator
 	local LastStageIndex
@@ -99,43 +102,35 @@ else
 	MissionInit:InsertFunction(Index, "SetSwapDefaultCarLocator", CarLocator)
 	MissionInit:InsertFunction(Index, "SwapInDefaultCar")
 	MissionInit:InsertFunction(Index, "SetFadeOut", 0.1)
-	
-	if Settings.RemoveOutOfVehicle then
-		local toRemove = {}
-		local toRemoveN = 0
-		local addCondition
-		local remove = false
-		for Function, Index in MissionInit:GetFunctions() do
-			local name = Function.Name:lower()
-			
-			if name == "addcondition" then
-				if Function.Arguments[1] == "damage" then
-					addCondition = Index
-				end
+end
+
+if Settings.AddBustedCondition or Settings.AddDamageCondition then
+	local inStage = false
+	local hasBusted = false
+	local hasDamage = false
+	for Function, Index in MissionInit:GetFunctions(nil, true) do
+		local name = Function.Name:lower()
+		if name == "closestage" then
+			inStage = true
+			hasBusted = false
+		elseif name == "addstage" then
+			inStage = false
+			if not hasBusted and Settings.AddBustedCondition then
+				MissionInit:InsertFunction(Index + 1, "CloseCondition")
+				MissionInit:InsertFunction(Index + 1, "AddCondition", "hitandruncaught")
 			end
-			
-			if addCondition then
-				if name == "setcondtargetvehicle" then
-					if Function.Arguments[1] == CarName then -- TODO: Check if "current" is valid
-						remove = true
-					end
-				end
-				
-				if name == "closecondition" then
-					if remove then
-						for j=addCondition,Index do
-							toRemoveN = toRemoveN + 1
-							toRemove[toRemoveN] = j
-						end
-					end
-					remove = false
-					addCondition = nil
-				end
+			if not hasDamage and Settings.AddDamageCondition then
+				MissionInit:InsertFunction(Index + 1, "CloseCondition")
+				MissionInit:InsertFunction(Index + 1, "SetCondTargetVehicle", CarName)
+				MissionInit:InsertFunction(Index + 1, "SetCondMinHealth", 0.0)
+				MissionInit:InsertFunction(Index + 1, "AddCondition", "damage")
 			end
-		end
-		
-		for i=toRemoveN,1,-1 do
-			MissionInit:RemoveFunction(toRemove[i])
+		elseif inStage and name == "addcondition" then
+			if Function.Arguments[1] == "hitandruncaught" then
+				hasBusted = true
+			elseif Function.Arguments[1] == "damage" then
+				hasDamage = true
+			end
 		end
 	end
 end

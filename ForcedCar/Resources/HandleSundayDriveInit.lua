@@ -1,4 +1,7 @@
 if not Settings.RemoveCarLocks and not Settings.RemoveCostumeLocks and not Settings.RemoveFMVs then
+	if ModSandbox then
+		Output(ReadFile(GetGamePath(GetPath())))
+	end
 	return
 end
 
@@ -26,6 +29,6 @@ if Settings.RemoveCostumeLocks then
 	changed = RemoveLocks(MFK, "skin") or changed
 end
 
-if changed then
+if ModSandbox or changed then
 	MFK:Output(true)
 end
