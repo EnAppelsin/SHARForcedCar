@@ -4,6 +4,11 @@ local GamePath = GetGamePath(Path)
 local MissionLoad = MFKLexer.Lexer:Parse(ReadFile(GamePath))
 MissionInit = MFKLexer.Lexer:Parse(ReadFile(GamePath:sub(1, -6) .. "i.mfk"))
 
+local LevelCar = LevelCars[Level]
+local CarName = LevelCar.CarName
+local CarPath = LevelCar.CarPath
+local ConPath = LevelCar.ConPath
+
 local isForced = false
 local oldForcedCar = nil
 for Function in MissionLoad:GetFunctions("LoadDisposableCar", true) do
