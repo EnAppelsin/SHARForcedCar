@@ -141,32 +141,61 @@ local CarPool = {
 }
 
 Settings = GetSettings()
+LevelCars = {}
+local DefaultCarName
 if Settings.UseCustomVehicle then
 	if #Settings.CustomVehicle == 0 then
 		Alert("You must specify a vehicle name when using a custom vehicle.")
 		os.exit()
 		return
 	end
-	CarName = Settings.CustomVehicle
+	DefaultCarName = Settings.CustomVehicle
 else
-	CarName = CarPool[Settings.Vehicle]
-end
-CarPath = "art\\cars\\" .. CarName .. ".p3d"
-ConPath = "scripts\\cars\\" .. CarName .. ".con"
-
-if not Exists(GetGamePath(CarPath), true, false) then
-	Alert("Could not find car at path: " .. CarPath)
-	os.exit()
-	return
+	DefaultCarName = CarPool[Settings.Vehicle]
 end
 
-if not Exists(GetGamePath(ConPath), true, false) then
-	Alert("Could not find car config at path: " .. ConPath)
-	os.exit()
-	return
+for i=1,7 do
+	local LevelCarName
+	if Settings["OverrideL" .. i] then
+		if Settings["UseCustomVehicleL" .. i] then
+			if #Settings["CustomVehicleL" .. i] == 0 then
+				Alert("You must specify a vehicle name when using a custom vehicle (Level " .. i .. ").")
+				os.exit()
+				return
+			end
+			LevelCarName = Settings["CustomVehicleL" .. i]
+		else
+			LevelCarName = CarPool[Settings["VehicleL" .. i]]
+		end
+	else
+		LevelCarName = DefaultCarName
+	end
+	LevelCars[i] = {
+		CarName = LevelCarName,
+		CarPath = "art\\cars\\" .. LevelCarName .. ".p3d",
+		ConPath = "scripts\\cars\\" .. LevelCarName .. ".con",
+	}
 end
 
-print("Forced Car chosen is: " .. CarName)
+for i=1,7 do
+	local LevelCar = LevelCars[i]
+	if not Exists(GetGamePath(LevelCar.CarPath), true, false) then
+		Alert("Could not find car at path: " .. LevelCar.CarPath)
+		os.exit()
+		return
+	end
+
+	if not Exists(GetGamePath(LevelCar.ConPath), true, false) then
+		Alert("Could not find car config at path: " .. LevelCar.ConPath)
+		os.exit()
+		return
+	end
+end
+
+print("Forced Cars chosen are: ")
+for i=1,7 do
+	print("", LevelCars[i].CarName)
+end
 
 function RemoveLocks(MFK, type)
 	local toRemove = {}
