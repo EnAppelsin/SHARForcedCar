@@ -5,15 +5,36 @@ local SPT = SPTParser.SPTFile(GamePath)
 
 local changed = false
 
-for carSoundParameters in SPT:GetClasses("carSoundParameters") do
-	for method, index in carSoundParameters:GetMethods(true) do
-		local name = method.Name
-		if name == "SetEngineClipName" or name == "SetEngineIdleClipName" then
-			if method.Parameters[1] == "tt" then
-				method.Parameters[1] = "apu_car"
-				changed = true
-			end
-		end
+local bookbVCarSoundParameters = SPT:GetClass("carSoundParameters", false, "bookb_v")
+if bookbVCarSoundParameters then
+	local overlayClipMethod = bookbVCarSoundParameters:GetMethod(false, "SetOverlayClipName")
+	if overlayClipMethod and overlayClipMethod.Parameters[1] == "" then
+		overlayClipMethod.Parameters[1] = "book_fire"
+		changed = true
+	end
+end
+
+local monorailCarSoundParameters  = SPT:GetClass("carSoundParameters", false, "mono_v")
+if monorailCarSoundParameters  then
+	local overlayClipMethod = monorailCarSoundParameters :GetMethod(false, "SetOverlayClipName")
+	if overlayClipMethod and overlayClipMethod.Parameters[1] == "generator" then
+		overlayClipMethod.Parameters[1] = "mono_overlay"
+		changed = true
+	end
+end
+
+local ttCarSoundParameters = SPT:GetClass("carSoundParameters", false, "tt")
+if ttCarSoundParameters then
+	local engineClipMethod = ttCarSoundParameters:GetMethod(false, "SetEngineClipName")
+	if engineClipMethod and engineClipMethod.Parameters[1] == "tt" then
+		changed = true
+		engineClipMethod.Parameters[1] = "apu_car"
+	end
+	
+	local engineIdleClipMethod = ttCarSoundParameters:GetMethod(false, "SetEngineIdleClipName")
+	if engineIdleClipMethod and engineIdleClipMethod.Parameters[1] == "tt" then
+		changed = true
+		engineIdleClipMethod.Parameters[1] = "apu_car"
 	end
 end
 

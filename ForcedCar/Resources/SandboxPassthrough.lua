@@ -16,6 +16,7 @@ local Handlers = {
 	-- TT fixes
 	["scripts\\cars\\tt.con"] = "Resources/HandleCarConfig.lua",
 	["art\\cars\\tt.p3d"] = "Resources/HandleTTModel.lua",
+	["sound\\scripts\\bookb_v.spt"] = "Resources/HandleBookbv.lua",
 	["sound\\scripts\\car_tune.spt"] = "Resources/HandleCarTune.lua",
 }
 
