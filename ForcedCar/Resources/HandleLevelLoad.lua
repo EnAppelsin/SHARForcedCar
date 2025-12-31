@@ -4,6 +4,11 @@ local Level = tonumber(Path:match("level0(%d)"))
 local LevelLoad = MFKLexer.Lexer:Parse(ReadFile("/GameData/scripts/missions/level0" .. Level .. "/level.mfk"))
 LevelInit = MFKLexer.Lexer:Parse(ReadFile("/GameData/scripts/missions/level0" .. Level .. "/leveli.mfk"))
 
+local LevelCar = LevelCars[Level]
+local CarName = LevelCar.CarName
+local CarPath = LevelCar.CarPath
+local ConPath = LevelCar.ConPath
+
 local needsAdd = true
 for Function in LevelLoad:GetFunctions("LoadDisposableCar", true) do
 	if Function.Arguments[3] == "DEFAULT" then
