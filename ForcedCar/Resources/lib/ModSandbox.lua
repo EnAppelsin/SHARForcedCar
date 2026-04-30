@@ -73,6 +73,18 @@ env.GetSettings = function(mod)
 	return GetSettings(mod or MainMod)
 end
 
+env.GetCustomSaveDataValue = function(name, mod)
+	return GetCustomSaveDataValue(name, mod or MainMod)
+end
+
+env.SetCustomSaveDataValue = function(name, value, mod)
+	return SetCustomSaveDataValue(name, value, mod or MainMod)
+end
+
+env.GetCustomSaveDataValues = function(mod)
+	return GetCustomSaveDataValues(mod or MainMod)
+end
+
 env.dofile = function(path)
 	return load(env.ReadFile(path), path, "t", env)()
 end
